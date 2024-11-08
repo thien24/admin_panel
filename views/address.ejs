@@ -62,7 +62,7 @@
         // Fetch and display all addresses
         async function fetchAddresses() {
             try {
-                const response = await axios.get('http://localhost:3000/address');
+                const response = await axios.get('https://api-flutter-hyll.onrender.com/address');
                 const addresses = response.data;
                 const addressList = document.getElementById('addressList');
                 addressList.innerHTML = '';
@@ -103,9 +103,9 @@
 
             try {
                 if (editingAddressId) {
-                    await axios.put(`http://localhost:3000/address/${editingAddressId}`, newAddress);
+                    await axios.put(`https://api-flutter-hyll.onrender.com/address/${editingAddressId}`, newAddress);
                 } else {
-                    await axios.post('http://localhost:3000/address', newAddress);
+                    await axios.post('https://api-flutter-hyll.onrender.com/address', newAddress);
                 }
                 fetchAddresses();
                 e.target.reset();
@@ -147,7 +147,7 @@
         // Delete a single address
         async function deleteAddress(id) {
             try {
-                await axios.delete(`http://localhost:3000/address/${id}`);
+                await axios.delete(`https://api-flutter-hyll.onrender.com/address/${id}`);
                 fetchAddresses();
             } catch (error) {
                 console.error('Error deleting address:', error);
@@ -158,7 +158,7 @@
         // Delete all addresses
         async function deleteAllAddresses() {
             try {
-                await axios.delete('http://localhost:3000/address/deleteAll');
+                await axios.delete('https://api-flutter-hyll.onrender.com/address/deleteAll');
                 fetchAddresses();
             } catch (error) {
                 console.error('Error deleting all addresses:', error);
