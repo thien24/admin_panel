@@ -66,7 +66,7 @@
 
         async function fetchOrders() {
             try {
-                const response = await axios.get('http://localhost:5000/orders');
+                const response = await axios.get('https://api-admin-backend-uetv.onrender.com/orders');
                 console.log(response.data);  // In dữ liệu trả về từ backend
                 if (response.data && response.data.length > 0) {
                     const orders = response.data;
@@ -112,9 +112,9 @@
 
             try {
                 if (editingOrderId) {
-                    await axios.put(`http://localhost:5000/orders/update/${editingOrderId}`, newOrder);
+                    await axios.put(`https://api-admin-backend-uetv.onrender.com/orders/update/${editingOrderId}`, newOrder);
                 } else {
-                    await axios.post('http://localhost:5000/orders/create', newOrder);
+                    await axios.post('https://api-admin-backend-uetv.onrender.com/orders/create', newOrder);
                 }
                 fetchOrders();
                 e.target.reset();
@@ -138,7 +138,7 @@
 
         async function deleteOrder(id) {
             try {
-                await axios.delete(`http://localhost:5000/orders/delete/${id}`);
+                await axios.delete(`https://api-admin-backend-uetv.onrender.com/orders/delete/${id}`);
                 fetchOrders();
             } catch (error) {
                 console.error('Error deleting order:', error);
@@ -148,7 +148,7 @@
 
         async function deleteAllOrders() {
             try {
-                await axios.delete('http://localhost:5000/orders/deleteAll');
+                await axios.delete('https://api-admin-backend-uetv.onrender.com/orders/deleteAll');
                 fetchOrders();
             } catch (error) {
                 console.error('Error deleting all orders:', error);
