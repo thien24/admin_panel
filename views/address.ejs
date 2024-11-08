@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Address</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Address Admin</h1>
+        <form id="addressForm">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="avatar" class="form-label">Avatar URL</label>
+                <input type="text" class="form-control" id="avatar" required>
+            </div>
+            <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" required>
+            </div>
+            <div class="mb-3">
+                <label for="imagecity" class="form-label">City Image URL</label>
+                <input type="text" class="form-control" id="imagecity" required>
+            </div>
+            <div class="mb-3">
+                <label for="note" class="form-label">Note</label>
+                <textarea class="form-control" id="note" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitButton">Add Address</button>
+            <button type="submit" class="btn btn-success" id="updateButton" style="display: none;">Update Address</button>
+
+        </form>
+
+        <button class="btn btn-danger mt-3" onclick="deleteAllAddresses()">Delete All Addresses</button>
+
+        <h2 class="mt-5">Existing Addresses</h2>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>City Image</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="addressList">
+                <!-- Address entries will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        let editingAddressId = null;
+
+        // Fetch and display all addresses
+        async function fetchAddresses() {
+            try {
+                const response = await axios.get('http://localhost:3000/address');
+                const addresses = response.data;
+                const addressList = document.getElementById('addressList');
+                addressList.innerHTML = '';
+
+                addresses.forEach(address => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><img src="${address.avatar}" alt="${address.name}" style="width: 50px; height: auto;"></td>
+                        <td>${address.name}</td>
+                        <td>${address.city}</td>
+                        <td><img src="${address.imagecity}" alt="${address.city}" style="width: 50px; height: auto;"></td>
+                        <td>${address.note}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editAddress('${address._id}', '${address.name}', '${address.avatar}', '${address.city}', '${address.imagecity}', '${address.note}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAddress('${address._id}')">Delete</button>
+                        </td>
+                    `;
+                    addressList.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error fetching addresses:', error);
+                alert('Error fetching addresses: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        // Handle form submission to create or update an address
+        document.getElementById('addressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const newAddress = {
+                name: document.getElementById('name').value,
+                avatar: document.getElementById('avatar').value,
+                city: document.getElementById('city').value,
+                imagecity: document.getElementById('imagecity').value,
+                note: document.getElementById('note').value,
+                id: (Math.random() + 1).toString(36).substring(7) // Simple random id for now, replace it with your logic if needed
+            };
+
+            try {
+                if (editingAddressId) {
+                    await axios.put(`http://localhost:3000/address/${editingAddressId}`, newAddress);
+                } else {
+                    await axios.post('http://localhost:3000/address', newAddress);
+                }
+                fetchAddresses();
+                e.target.reset();
+                editingAddressId = null;
+                toggleButtonVisibility(); // Reset button visibility
+
+            } catch (error) {
+                console.error('Error adding/updating address:', error);
+                alert('Error adding/updating address: ' + (error.response?.data?.message || error.message));
+            }
+        });
+
+        // Pre-fill form for editing an address
+        async function editAddress(id, name, avatar, city, imagecity, note) {
+            editingAddressId = id;
+            document.getElementById('name').value = name;
+            document.getElementById('avatar').value = avatar;
+            document.getElementById('city').value = city;
+            document.getElementById('imagecity').value = imagecity;
+            document.getElementById('note').value = note;
+
+            // Toggle button visibility
+            toggleButtonVisibility();
+        }
+        
+        function toggleButtonVisibility() {
+            const submitButton = document.getElementById('submitButton');
+            const updateButton = document.getElementById('updateButton');
+
+            if (editingAddressId ) {
+                submitButton.style.display = 'none';
+                updateButton.style.display = 'inline-block';
+            } else {
+                submitButton.style.display = 'inline-block';
+                updateButton.style.display = 'none';
+            }
+        }
+
+        // Delete a single address
+        async function deleteAddress(id) {
+            try {
+                await axios.delete(`http://localhost:3000/address/${id}`);
+                fetchAddresses();
+            } catch (error) {
+                console.error('Error deleting address:', error);
+                alert('Error deleting address: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        // Delete all addresses
+        async function deleteAllAddresses() {
+            try {
+                await axios.delete('http://localhost:3000/address/deleteAll');
+                fetchAddresses();
+            } catch (error) {
+                console.error('Error deleting all addresses:', error);
+                alert('Error deleting all addresses: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        // Initial fetch of addresses
+        fetchAddresses();
+    </script>
+</body>
+</html>

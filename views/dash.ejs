@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Sidebar Style */
+        body {
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            color: white;
+            background-color: #343a40;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #sidebar a {
+            padding: 15px;
+            text-decoration: none;
+            display: block;
+            color: aliceblue;
+            margin-bottom: 10px; /* Added margin to create space between items */
+        }
+        #sidebar a:hover {
+            background-color: #495057;
+        }
+        #main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+        }
+        #sidebar .list-group-item {
+            background-color: transparent; /* Transparent background */
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="p-3">
+        <h2 class="text-center">Admin Dashboard</h2>
+        <div class="list-group">
+            <a href="/admin" class="list-group-item list-group-item-action">
+                <i class="fas fa-tasks"></i> Manage Trips
+            </a>
+            <a href="/address" class="list-group-item list-group-item-action">
+                <i class="fas fa-map-marker-alt"></i> Manage Addresses
+            </a>
+            <a href="/user" class="list-group-item list-group-item-action">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+            <a href="/products" class="list-group-item list-group-item-action">
+                <i class="fas fa-box"></i> Manage Products
+            </a>
+            <a href="/categories" class="list-group-item list-group-item-action">
+                <i class="fas fa-th"></i> Manage Categories
+            </a>
+            <a href="/orders" class="list-group-item list-group-item-action">
+                <i class="fas fa-shopping-cart"></i> Manage Orders
+            </a>
+            <a href="/reports" class="list-group-item list-group-item-action">
+                <i class="fas fa-chart-line"></i> View Reports
+            </a>
+            <a href="/settings" class="list-group-item list-group-item-action">
+                <i class="fas fa-cogs"></i> Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <% if (body === 'admin') { %>
+            <%- include('admin.ejs') %> <!-- Render the admin partial -->
+        <% } else if (body === 'address') { %>
+            <%- include('address.ejs') %> <!-- Render the address partial -->
+        <% } else if (body === 'user') { %>
+            <%- include('user.ejs') %> <!-- Render the user partial -->
+        <% } else if (body === 'products') { %>
+            <%- include('products.ejs') %> <!-- Render the products partial -->
+        <% } else if (body === 'categories') { %>
+            <%- include('categories.ejs') %> <!-- Render the categories partial -->
+        <% } else if (body === 'orders') { %>
+            <%- include('orders.ejs') %> <!-- Render the orders partial -->
+        <% } else if (body === 'reports') { %>
+            <%- include('reports.ejs') %> <!-- Render the reports partial -->
+        <% } else if (body === 'settings') { %>
+            <%- include('settings.ejs') %> <!-- Render the settings partial -->
+        <% } else { %>
+            <h1>Welcome to the Admin Dashboard!</h1>
+        <% } %>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

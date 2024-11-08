@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">Category Admin</h1>
+
+        <!-- Category Form -->
+        <form id="categoryForm">
+            <div class="mb-3">
+                <label for="categoryName" class="form-label">Category Name</label>
+                <input type="text" class="form-control" id="categoryName" required>
+            </div>
+            <div class="mb-3">
+                <label for="categoryDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="categoryDescription" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Category</button>
+        </form>
+
+        <!-- Delete All Button -->
+        <button class="btn btn-danger mt-3" onclick="deleteAllCategories()">Delete All Categories</button>
+
+        <h2 class="mt-5">Existing Categories</h2>
+        <table class="table table-striped mt-3" id="categoryTable">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="categoryList"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        let editingCategoryId = null;
+
+        async function fetchCategories() {
+            try {
+                const response = await axios.get('http://localhost:5000/categories');
+                console.log(response.data);  // In dữ liệu trả về từ backend
+                if (response.data && response.data.length > 0) {
+                    const categories = response.data;
+                    const categoryList = document.getElementById('categoryList');
+                    categoryList.innerHTML = '';
+                    categories.forEach(category => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${category.name}</td>
+                            <td>${category.description}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editCategory('${category._id}', '${category.name}', '${category.description}')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCategory('${category._id}')">Delete</button>
+                            </td>
+                        `;
+                        categoryList.appendChild(row);
+                    });
+                } else {
+                    alert('Không có danh mục nào.');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh mục:', error);
+                alert('Lỗi: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newCategory = {
+                name: document.getElementById('categoryName').value,
+                description: document.getElementById('categoryDescription').value
+            };
+
+            try {
+                if (editingCategoryId) {
+                    await axios.put(`http://localhost:5000/categories/update/${editingCategoryId}`, newCategory);
+                } else {
+                    await axios.post('http://localhost:5000/categories/create', newCategory);
+                }
+                fetchCategories();
+                e.target.reset();
+                editingCategoryId = null;
+            } catch (error) {
+                console.error('Error adding/updating category:', error);
+                alert('Error adding/updating category: ' + (error.response?.data?.message || error.message));
+            }
+        });
+
+        async function editCategory(id, name, description) {
+            editingCategoryId = id;
+            document.getElementById('categoryName').value = name;
+            document.getElementById('categoryDescription').value = description;
+        }
+
+        async function deleteCategory(id) {
+            try {
+                await axios.delete(`http://localhost:5000/categories/delete/${id}`);
+                fetchCategories();
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Error deleting category: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        async function deleteAllCategories() {
+            try {
+                await axios.delete('http://localhost:5000/categories/deleteAll');
+                fetchCategories();
+            } catch (error) {
+                console.error('Error deleting all categories:', error);
+                alert('Error deleting all categories: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        fetchCategories();
+    </script>
+</body>
+</html>

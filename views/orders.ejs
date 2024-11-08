@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">Order Admin</h1>
+
+        <!-- Order Form -->
+        <form id="orderForm">
+            <div class="mb-3">
+                <label for="orderFullName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="orderFullName" required>
+            </div>
+            <div class="mb-3">
+                <label for="orderEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="orderEmail" required>
+            </div>
+            <div class="mb-3">
+                <label for="orderPhoneNumber" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" id="orderPhoneNumber" required>
+            </div>
+            <div class="mb-3">
+                <label for="orderNumberOfPeople" class="form-label">Number of People</label>
+                <input type="number" class="form-control" id="orderNumberOfPeople" required>
+            </div>
+            <div class="mb-3">
+                <label for="orderImageUrlUser" class="form-label">User Image URL</label>
+                <input type="text" class="form-control" id="orderImageUrlUser" required>
+            </div>
+            <div class="mb-3">
+                <label for="orderImageUrlTrip" class="form-label">Trip Image URL</label>
+                <input type="text" class="form-control" id="orderImageUrlTrip" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Order</button>
+        </form>
+
+        <!-- Delete All Button -->
+        <button class="btn btn-danger mt-3" onclick="deleteAllOrders()">Delete All Orders</button>
+
+        <h2 class="mt-5">Existing Orders</h2>
+        <table class="table table-striped mt-3" id="orderTable">
+            <thead>
+                <tr>
+                    <th>User Image</th>
+                    <th>Trip Image</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Number of People</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="orderList"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        let editingOrderId = null;
+
+        async function fetchOrders() {
+            try {
+                const response = await axios.get('http://localhost:5000/orders');
+                console.log(response.data);  // In dữ liệu trả về từ backend
+                if (response.data && response.data.length > 0) {
+                    const orders = response.data;
+                    const orderList = document.getElementById('orderList');
+                    orderList.innerHTML = '';
+                    orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><img src="${order.imageUrlUser}" alt="User" style="width: 100px; height: auto;"></td>
+                            <td><img src="${order.imageUrlTrip}" alt="Trip" style="width: 100px; height: auto;"></td>
+                            <td>${order.fullName}</td>
+                            <td>${order.email}</td>
+                            <td>${order.phoneNumber}</td>
+                            <td>${order.numberOfPeople}</td>
+                            <td>${order.status}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editOrder('${order._id}', '${order.fullName}', '${order.email}', '${order.phoneNumber}', ${order.numberOfPeople}, '${order.status}', '${order.imageUrlUser}', '${order.imageUrlTrip}')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${order._id}')">Delete</button>
+                            </td>
+                        `;
+                        orderList.appendChild(row);
+                    });
+                } else {
+                    alert('No orders found.');
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+                alert('Error: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newOrder = {
+                fullName: document.getElementById('orderFullName').value,
+                email: document.getElementById('orderEmail').value,
+                phoneNumber: document.getElementById('orderPhoneNumber').value,
+                numberOfPeople: document.getElementById('orderNumberOfPeople').value,
+                imageUrlUser: document.getElementById('orderImageUrlUser').value,
+                imageUrlTrip: document.getElementById('orderImageUrlTrip').value,
+                status: "pending"  // Default status
+            };
+
+            try {
+                if (editingOrderId) {
+                    await axios.put(`http://localhost:5000/orders/update/${editingOrderId}`, newOrder);
+                } else {
+                    await axios.post('http://localhost:5000/orders/create', newOrder);
+                }
+                fetchOrders();
+                e.target.reset();
+                editingOrderId = null;
+            } catch (error) {
+                console.error('Error adding/updating order:', error);
+                alert('Error adding/updating order: ' + (error.response?.data?.message || error.message));
+            }
+        });
+
+        async function editOrder(id, fullName, email, phoneNumber, numberOfPeople, status, imageUrlUser, imageUrlTrip) {
+            editingOrderId = id;
+            document.getElementById('orderFullName').value = fullName;
+            document.getElementById('orderEmail').value = email;
+            document.getElementById('orderPhoneNumber').value = phoneNumber;
+            document.getElementById('orderNumberOfPeople').value = numberOfPeople;
+            document.getElementById('orderStatus').value = status;
+            document.getElementById('orderImageUrlUser').value = imageUrlUser;
+            document.getElementById('orderImageUrlTrip').value = imageUrlTrip;
+        }
+
+        async function deleteOrder(id) {
+            try {
+                await axios.delete(`http://localhost:5000/orders/delete/${id}`);
+                fetchOrders();
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert('Error deleting order: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        async function deleteAllOrders() {
+            try {
+                await axios.delete('http://localhost:5000/orders/deleteAll');
+                fetchOrders();
+            } catch (error) {
+                console.error('Error deleting all orders:', error);
+                alert('Error deleting all orders: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        fetchOrders();
+    </script>
+</body>
+</html>

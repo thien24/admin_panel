@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Trip</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Trip Admin</h1>
+        <form id="tripForm">
+            <div class="mb-3">
+                <label for="tripName" class="form-label">Trip Name</label>
+                <input type="text" class="form-control" id="tripName" required>
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Date</label>
+                <input type="date" class="form-control" id="date" required>
+            </div>
+            <div class="mb-3">
+                <label for="time" class="form-label">Time</label>
+                <input type="time" class="form-control" id="time" required>
+            </div>
+            <div class="mb-3">
+                <label for="guide" class="form-label">Guide</label>
+                <input type="text" class="form-control" id="guide" required>
+            </div>
+            <div class="mb-3">
+                <label for="imageURL" class="form-label">Image URL</label>
+                <input type="text" class="form-control" id="imageURL" required>
+            </div>
+            <!-- Display the Add button or Update button based on editing status -->
+            <button type="submit" class="btn btn-primary" id="submitButton">Add Trip</button>
+            <button type="submit" class="btn btn-success" id="updateButton" style="display: none;">Update Trip</button>
+        </form>
+
+        <button class="btn btn-danger mt-3" onclick="deleteAllTrips()">Delete All Trips</button>
+
+        <h2 class="mt-5">Existing Trips</h2>
+        <table class="table table-striped mt-3" id="tripTable">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Trip Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Guide</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tripTableBody"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        let editingTripId = null;
+
+        async function fetchTrips() {
+            try {
+                const response = await axios.get('http://localhost:3000/trips');
+                const trips = response.data;
+                const tripTableBody = document.getElementById('tripTableBody');
+                tripTableBody.innerHTML = '';
+
+                trips.forEach(trip => {
+                    const tripInfo = trip.trip;
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td><img src="${trip.imageURL}" alt="${tripInfo.tripName}" style="width: 100px; height: auto;"></td>
+                        <td>${tripInfo.tripName}</td>
+                        <td>${tripInfo.date}</td>
+                        <td>${tripInfo.time}</td>
+                        <td>${tripInfo.guide}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editTrip('${trip._id}', '${tripInfo.tripName}', '${tripInfo.date}', '${tripInfo.time}', '${tripInfo.guide}', '${trip.imageURL}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTrip('${trip._id}')">Delete</button>
+                        </td>
+                    `;
+
+                    tripTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching trips:', error);
+            }
+        }
+
+        document.getElementById('tripForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const newTrip = {
+        name: document.getElementById('tripName').value, // Thêm trường name
+        imageURL: document.getElementById('imageURL').value,
+        trip: {
+            tripName: document.getElementById('tripName').value,
+            date: document.getElementById('date').value,
+            time: document.getElementById('time').value,
+            guide: document.getElementById('guide').value,
+        }
+    };
+
+    try {
+        if (editingTripId) {
+            await axios.put(`http://localhost:3000/trips/${editingTripId}`, newTrip);
+        } else {
+            const response = await axios.post('http://localhost:3000/trips', newTrip);
+            console.log(response.data); // In ra phản hồi để kiểm tra
+        }
+        fetchTrips();
+        e.target.reset();
+        editingTripId = null;
+        toggleButtonVisibility(); // Reset button visibility
+    } catch (error) {
+        console.error('Error adding/updating trip:', error);
+        alert('Error adding/updating trip: ' + (error.response?.data?.message || error.message));
+    }
+});
+
+        async function editTrip(id, tripName, date, time, guide, imageURL) {
+            editingTripId = id;
+            document.getElementById('tripName').value = tripName;
+            document.getElementById('date').value = date;
+            document.getElementById('time').value = time;
+            document.getElementById('guide').value = guide;
+            document.getElementById('imageURL').value = imageURL;
+
+            // Toggle button visibility
+            toggleButtonVisibility();
+        }
+
+        function toggleButtonVisibility() {
+            const submitButton = document.getElementById('submitButton');
+            const updateButton = document.getElementById('updateButton');
+
+            if (editingTripId) {
+                submitButton.style.display = 'none';
+                updateButton.style.display = 'inline-block';
+            } else {
+                submitButton.style.display = 'inline-block';
+                updateButton.style.display = 'none';
+            }
+        }
+
+        async function deleteTrip(id) {
+            try {
+                await axios.delete(`http://localhost:3000/trips/${id}`);
+                
+                fetchTrips();
+            } catch (error) {
+                console.error('Error deleting trip:', error);
+                alert('Error deleting trip: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        async function deleteAllTrips() {
+            try {
+                await axios.delete('http://localhost:3000/trips');
+                fetchTrips();
+            } catch (error) {
+                console.error('Error deleting all trips:', error);
+                alert('Error deleting all trips: ' + (error.response?.data?.message || error.message));
+            }
+        }
+
+        fetchTrips();
+    </script>
+</body>
+</html>
