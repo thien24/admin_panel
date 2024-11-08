@@ -45,7 +45,7 @@
 
         async function fetchCategories() {
             try {
-                const response = await axios.get('http://localhost:5000/categories');
+                const response = await axios.get('https://api-admin-backend-uetv.onrender.com/categories');
                 console.log(response.data);  // In dữ liệu trả về từ backend
                 if (response.data && response.data.length > 0) {
                     const categories = response.data;
@@ -81,9 +81,9 @@
 
             try {
                 if (editingCategoryId) {
-                    await axios.put(`http://localhost:5000/categories/update/${editingCategoryId}`, newCategory);
+                    await axios.put(`https://api-admin-backend-uetv.onrender.com/categories/update/${editingCategoryId}`, newCategory);
                 } else {
-                    await axios.post('http://localhost:5000/categories/create', newCategory);
+                    await axios.post('https://api-admin-backend-uetv.onrender.com/categories/create', newCategory);
                 }
                 fetchCategories();
                 e.target.reset();
@@ -102,7 +102,7 @@
 
         async function deleteCategory(id) {
             try {
-                await axios.delete(`http://localhost:5000/categories/delete/${id}`);
+                await axios.delete(`https://api-admin-backend-uetv.onrender.com/categories/delete/${id}`);
                 fetchCategories();
             } catch (error) {
                 console.error('Error deleting category:', error);
@@ -112,7 +112,7 @@
 
         async function deleteAllCategories() {
             try {
-                await axios.delete('http://localhost:5000/categories/deleteAll');
+                await axios.delete('https://api-admin-backend-uetv.onrender.com/categories/deleteAll');
                 fetchCategories();
             } catch (error) {
                 console.error('Error deleting all categories:', error);
