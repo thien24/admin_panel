@@ -59,7 +59,7 @@
 
         async function fetchTrips() {
             try {
-                const response = await axios.get('http://localhost:3000/trips');
+                const response = await axios.get('https://api-flutter-hyll.onrender.com/trips');
                 const trips = response.data;
                 const tripTableBody = document.getElementById('tripTableBody');
                 tripTableBody.innerHTML = '';
@@ -103,9 +103,9 @@
 
     try {
         if (editingTripId) {
-            await axios.put(`http://localhost:3000/trips/${editingTripId}`, newTrip);
+            await axios.put(`https://api-flutter-hyll.onrender.com/trips/${editingTripId}`, newTrip);
         } else {
-            const response = await axios.post('http://localhost:3000/trips', newTrip);
+            const response = await axios.post('https://api-flutter-hyll.onrender.com/trips', newTrip);
             console.log(response.data); // In ra phản hồi để kiểm tra
         }
         fetchTrips();
@@ -145,7 +145,7 @@
 
         async function deleteTrip(id) {
             try {
-                await axios.delete(`http://localhost:3000/trips/${id}`);
+                await axios.delete(`http://https://api-flutter-hyll.onrender.com/trips/${id}`);
                 
                 fetchTrips();
             } catch (error) {
@@ -156,7 +156,7 @@
 
         async function deleteAllTrips() {
             try {
-                await axios.delete('http://localhost:3000/trips');
+                await axios.delete('https://api-flutter-hyll.onrender.com/trips');
                 fetchTrips();
             } catch (error) {
                 console.error('Error deleting all trips:', error);
