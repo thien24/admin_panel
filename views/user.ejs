@@ -67,7 +67,7 @@
         let editingUserId = null;
 
         async function fetchUsers() {
-            const response = await axios.get('http://localhost:3000/user');
+            const response = await axios.get('https://api-flutter-hyll.onrender.com/user');
             const users = response.data;
             const userList = document.getElementById('userList');
             userList.innerHTML = '';
@@ -103,9 +103,9 @@
 
             try {
                 if (editingUserId) {
-                    await axios.put(`http://localhost:3000/user/update/${editingUserId}`, newUser);
+                    await axios.put(`https://api-flutter-hyll.onrender.com/user/update/${editingUserId}`, newUser);
                 } else {
-                    await axios.post('http://localhost:3000/user/create', newUser);
+                    await axios.post('https://api-flutter-hyll.onrender.com/user/create', newUser);
                 }
                 fetchUsers();
                 e.target.reset();
@@ -146,7 +146,7 @@
 
         async function deleteUser(id) {
             try {
-                await axios.delete(`http://localhost:3000/user/delete/${id}`);
+                await axios.delete(`https://api-flutter-hyll.onrender.com/user/delete/${id}`);
                 fetchUsers();
             } catch (error) {
                 console.error('Error deleting user:', error);
@@ -156,7 +156,7 @@
 
         async function deleteAllUsers() {
             try {
-                await axios.delete('http://localhost:3000/user/deleteAll');
+                await axios.delete('https://api-flutter-hyll.onrender.com/user/deleteAll');
                 fetchUsers();
             } catch (error) {
                 console.error('Error deleting all users:', error);
