@@ -27,7 +27,7 @@
         document.getElementById('status').innerText = 'Generating report...';
 
         // Gọi API để xuất báo cáo Excel
-        const response = await axios.get('https://report-excel.onrender.com/api/report', {
+        const response = await axios.get('http://localhost:5001/api/report', {
             responseType: 'blob'  // Quan trọng để tải file nhị phân
         });
 
